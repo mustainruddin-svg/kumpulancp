@@ -1,0 +1,363 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.wrap { padding: 1rem 0; }
+.top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.badge-kbsk { background: #E6F1FB; color: #0C447C; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+h1 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.subtitle { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.tab { padding: 7px 16px; font-size: 13px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; cursor: pointer; color: var(--color-text-secondary); background: transparent; transition: all 0.15s; }
+.tab.active { background: #185FA5; color: #fff; border-color: #185FA5; }
+.search-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+.search-row input { flex: 1; padding: 8px 12px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
+.filter-sel { padding: 8px 10px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
+.mapel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.mapel-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.mapel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; cursor: pointer; user-select: none; }
+.mapel-title-row { display: flex; align-items: center; gap: 10px; }
+.mapel-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.mapel-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.mapel-fase-badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.chevron { font-size: 14px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+.fase-list { padding: 0 14px 14px; display: none; }
+.fase-list.show { display: block; }
+.fase-item { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); margin-top: 8px; overflow: hidden; }
+.fase-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+.fase-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+.fase-kelas { font-size: 11px; color: var(--color-text-tertiary); }
+.cp-text { padding: 10px 12px; font-size: 13px; line-height: 1.65; color: var(--color-text-primary); }
+.copy-btn { display: flex; align-items: center; gap: 5px; font-size: 11px; padding: 4px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; cursor: pointer; color: var(--color-text-secondary); background: transparent; margin: 8px 12px 10px; transition: all 0.15s; }
+.copy-btn:hover { background: var(--color-background-secondary); }
+.copy-btn.copied { color: #0F6E56; border-color: #0F6E56; }
+.copy-all-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; cursor: pointer; color: var(--color-text-secondary); background: transparent; margin-top: 4px; transition: all 0.15s; }
+.copy-all-btn:hover { background: var(--color-background-secondary); }
+.copy-all-btn.copied { color: #0F6E56; border-color: #0F6E56; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--color-text-tertiary); font-size: 14px; }
+.count-info { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 1rem; }
+.all-copy-section { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+</style>
+
+<div class="wrap">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Dashboard Capaian Pembelajaran SD dan SMP berdasarkan Keputusan BSKAP No. 046/H/KR/2025</h2>
+
+<div class="top-bar">
+  <div>
+    <div class="badge-kbsk">SK BSKAP No. 046/H/KR/2025</div>
+    <h1 style="margin-top:6px;">Dashboard Capaian Pembelajaran</h1>
+    <p class="subtitle">Pendidikan Dasar — SD/MI &amp; SMP/MTs</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="setJenjang('sd')"><i class="ti ti-building-school" aria-hidden="true"></i> SD / MI</button>
+  <button class="tab" onclick="setJenjang('smp')"><i class="ti ti-school" aria-hidden="true"></i> SMP / MTs</button>
+  <button class="tab" onclick="setJenjang('all')"><i class="ti ti-layers" aria-hidden="true"></i> Semua</button>
+</div>
+
+<div class="search-row">
+  <input type="text" id="searchInput" placeholder="Cari mata pelajaran atau CP..." oninput="renderCards()" />
+  <select class="filter-sel" id="faseFilter" onchange="renderCards()">
+    <option value="">Semua Fase</option>
+    <option value="A">Fase A (Kelas 1–2)</option>
+    <option value="B">Fase B (Kelas 3–4)</option>
+    <option value="C">Fase C (Kelas 5–6)</option>
+    <option value="D">Fase D (Kelas 7–9)</option>
+  </select>
+</div>
+
+<div class="all-copy-section">
+  <span id="countInfo" class="count-info"></span>
+  <button class="copy-all-btn" id="copyAllBtn" onclick="copyAll()"><i class="ti ti-copy" aria-hidden="true"></i> Salin semua CP yang tampil</button>
+</div>
+
+<div class="mapel-grid" id="cardContainer"></div>
+</div>
+
+<script>
+const CP_DATA = {
+  sd: [
+    {
+      id: 'pai-sd', nama: 'Pendidikan Agama Islam & Budi Pekerti', icon: '☪', color: '#E1F5EE', iconColor: '#0F6E56',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu mengenal dan menyebutkan huruf hijaiah dan harakatnya serta membaca Al-Qur\'an dengan tartil. Peserta didik mampu mengenal rukun iman dan rukun Islam secara sederhana, serta menjalankan ibadah salat wajib dengan bimbingan. Peserta didik memiliki akhlak mulia seperti jujur, disiplin, dan santun dalam kehidupan sehari-hari.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu membaca Al-Qur\'an dengan benar sesuai kaidah tajwid dasar dan menghafal beberapa surah pendek. Peserta didik memahami makna rukun iman dan rukun Islam secara lebih mendalam serta mampu melaksanakan salat fardu secara mandiri. Peserta didik menunjukkan perilaku terpuji seperti amanah, peduli, dan toleran.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu membaca dan memahami kandungan Al-Qur\'an terkait akhlak dan ibadah. Peserta didik memahami sejarah Islam dan keteladanan Nabi Muhammad SAW serta para sahabat. Peserta didik mampu menerapkan nilai-nilai Islam dalam kehidupan bermasyarakat dengan menunjukkan akhlak mulia yang konsisten.' }
+      ]
+    },
+    {
+      id: 'ppkn-sd', nama: 'Pendidikan Pancasila', icon: '🦅', color: '#FAECE7', iconColor: '#993C1D',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu mengenal identitas diri dan keluarga serta memahami simbol-simbol sila Pancasila secara sederhana. Peserta didik mengenal aturan di rumah dan sekolah, serta menunjukkan perilaku sesuai nilai Pancasila seperti gotong royong dan saling menghormati.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu memahami nilai-nilai Pancasila dalam kehidupan sehari-hari dan menerapkannya di lingkungan keluarga, sekolah, dan masyarakat. Peserta didik mengenal keberagaman suku, budaya, dan agama di Indonesia serta memahami makna Bhinneka Tunggal Ika.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu menganalisis peran Pancasila sebagai dasar negara dan memahami sistem pemerintahan daerah dan pusat secara sederhana. Peserta didik berpartisipasi aktif dalam kehidupan demokratis di sekolah dan memiliki kesadaran akan hak dan kewajiban warga negara.' }
+      ]
+    },
+    {
+      id: 'binds-sd', nama: 'Bahasa Indonesia', icon: '📖', color: '#E6F1FB', iconColor: '#185FA5',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu bersikap menjadi pembaca dan pemirsa yang baik; mampu menampilkan teks dengan membaca nyaring, memahami kata-kata baru, dan memaknai kosakata baru. Peserta didik mampu menulis kalimat sederhana dengan huruf kapital dan tanda baca yang benar.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu memahami teks informatif dan fiksi, mengidentifikasi informasi pokok dan penjelas, serta merespon secara lisan dan tulisan. Peserta didik mampu menulis teks deskripsi, narasi, dan laporan sederhana menggunakan kosakata yang tepat dengan kalimat yang efektif.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu membaca dengan pemahaman tinggi, mengidentifikasi sudut pandang, membandingkan teks, dan menyimpulkan informasi. Peserta didik mampu menulis teks argumentasi, prosedur, dan eksposisi dengan struktur yang logis, kosakata yang beragam, dan ejaan yang benar.' }
+      ]
+    },
+    {
+      id: 'mat-sd', nama: 'Matematika', icon: '➕', color: '#FAEEDA', iconColor: '#854F0B',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu menunjukkan pemahaman bilangan cacah 0–999, melakukan operasi penjumlahan dan pengurangan bilangan dua angka, mengenal bangun datar dan bangun ruang sederhana, serta memahami konsep waktu dan satuan pengukuran dasar.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu melakukan operasi hitung bilangan cacah dan pecahan sederhana, memahami hubungan antar operasi, mengenal bilangan romawi, serta menghitung keliling dan luas bangun datar. Peserta didik mampu menyajikan dan menafsirkan data dalam bentuk tabel dan diagram sederhana.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu mengoperasikan pecahan, desimal, dan persen dalam berbagai konteks, memahami konsep rasio dan proporsi, menghitung luas dan volume bangun ruang sederhana, serta menganalisis data statistika dan peluang dalam kehidupan sehari-hari.' }
+      ]
+    },
+    {
+      id: 'ipas-sd', nama: 'IPAS (IPA & IPS)', icon: '🔬', color: '#EAF3DE', iconColor: '#3B6D11',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu mengenali diri dan lingkungan sekitarnya, memahami anggota tubuh dan fungsinya, mengenal makhluk hidup di sekitar, serta memahami lingkungan keluarga dan komunitas terdekat.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu memahami ciri-ciri makhluk hidup, hubungan antar makhluk hidup dalam ekosistem sederhana, gejala alam fisik, serta sejarah dan kebudayaan daerah setempat. Peserta didik menunjukkan kepedulian terhadap lingkungan alam dan sosial.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu menganalisis sistem kehidupan (rantai makanan, siklus air, tata surya), memahami gejala alam dan sains dasar secara konseptual, serta mengkaji kondisi sosial, ekonomi, dan budaya masyarakat Indonesia dalam konteks sejarah dan geografi.' }
+      ]
+    },
+    {
+      id: 'sbdp-sd', nama: 'Seni Budaya', icon: '🎨', color: '#FBEAF0', iconColor: '#993556',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu mengenali unsur-unsur dasar seni rupa, seni musik, dan seni tari. Peserta didik mengekspresikan diri melalui kegiatan menggambar, bernyanyi, dan bergerak dengan rasa senang dan percaya diri.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu memahami unsur-unsur seni dan estetika serta menggunakannya dalam berkarya. Peserta didik menciptakan karya seni rupa, musik, dan tari sederhana yang terinspirasi dari budaya lokal dan nusantara.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu mengapresiasi karya seni dari berbagai budaya dan menjelaskan nilai estetika serta pesan yang terkandung di dalamnya. Peserta didik mampu menciptakan karya seni yang orisinal dengan teknik yang lebih baik dan mengkomunikasikan proses kreatifnya.' }
+      ]
+    },
+    {
+      id: 'pjok-sd', nama: 'PJOK', icon: '⚽', color: '#E1F5EE', iconColor: '#085041',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu menunjukkan kemampuan gerak dasar manipulatif dan non-manipulatif dalam berbagai aktivitas fisik. Peserta didik memahami konsep tubuh sehat, kebersihan diri, dan keselamatan dalam bermain.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu mempraktikkan berbagai keterampilan gerak dalam permainan dan olahraga, memahami peraturan sederhana, serta bekerja sama dalam tim. Peserta didik memahami pentingnya gaya hidup sehat dan aktif.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu mempraktikkan berbagai aktivitas jasmani dengan teknik yang lebih baik, memahami taktik dasar dalam permainan, serta menerapkan prinsip hidup sehat, kebugaran jasmani, dan keselamatan dalam olahraga.' }
+      ]
+    },
+    {
+      id: 'bing-sd', nama: 'Bahasa Inggris', icon: '🌐', color: '#EEEDFE', iconColor: '#3C3489',
+      fases: [
+        { fase: 'A', kelas: 'Kelas 1–2', cp: 'Peserta didik mampu memahami dan menggunakan ungkapan sehari-hari dalam Bahasa Inggris secara lisan, mengenal kosakata dasar tentang identitas, anggota keluarga, benda, warna, dan angka, serta merespons instruksi sederhana.' },
+        { fase: 'B', kelas: 'Kelas 3–4', cp: 'Peserta didik mampu memahami teks lisan dan tulisan sederhana dalam Bahasa Inggris tentang topik familiar, menggunakan kosakata yang berkembang dalam kalimat sederhana, serta berkomunikasi secara dasar dalam konteks sekolah dan keluarga.' },
+        { fase: 'C', kelas: 'Kelas 5–6', cp: 'Peserta didik mampu memahami teks deskriptif dan naratif pendek dalam Bahasa Inggris, menulis kalimat dan paragraf sederhana, serta berkomunikasi secara lisan dengan kepercayaan diri dalam berbagai situasi sehari-hari.' }
+      ]
+    }
+  ],
+  smp: [
+    {
+      id: 'pai-smp', nama: 'Pendidikan Agama Islam & Budi Pekerti', icon: '☪', color: '#E1F5EE', iconColor: '#0F6E56',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu membaca Al-Qur\'an dengan tartil sesuai tajwid dan menghafalkan sejumlah surah pilihan beserta artinya. Peserta didik memahami pokok-pokok aqidah Islam (iman kepada Allah, malaikat, kitab, rasul, hari akhir, dan qada-qadar), fiqih ibadah, muamalah, dan sejarah peradaban Islam. Peserta didik memiliki akhlak mulia, mampu berpikir kritis terhadap nilai-nilai keislaman, dan mengintegrasikan nilai Islam dalam kehidupan bermasyarakat.' }
+      ]
+    },
+    {
+      id: 'ppkn-smp', nama: 'Pendidikan Pancasila', icon: '🦅', color: '#FAECE7', iconColor: '#993C1D',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu menganalisis nilai-nilai Pancasila sebagai pandangan hidup dan dasar negara, memahami sejarah perumusan Pancasila dan UUD 1945, serta mengkaji sistem pemerintahan, lembaga-lembaga negara, dan hak asasi manusia. Peserta didik berpartisipasi aktif sebagai warga negara yang bertanggung jawab dan memiliki kesadaran berbangsa dan bernegara.' }
+      ]
+    },
+    {
+      id: 'binds-smp', nama: 'Bahasa Indonesia', icon: '📖', color: '#E6F1FB', iconColor: '#185FA5',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu membaca, memahami, dan mengevaluasi teks dari berbagai genre (teks informasi, narasi, argumentasi, fiksi) dengan menggunakan strategi membaca yang sesuai. Peserta didik mampu menulis teks dengan berbagai tujuan dan genre secara terstruktur, menggunakan kalimat efektif, diksi tepat, dan ejaan yang benar. Peserta didik mampu berkomunikasi secara lisan dan tulisan dengan kritis dan kreatif.' }
+      ]
+    },
+    {
+      id: 'mat-smp', nama: 'Matematika', icon: '➕', color: '#FAEEDA', iconColor: '#854F0B',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu menggunakan bilangan bulat, pecahan, dan bilangan berpangkat dalam berbagai konteks; memahami aljabar dan fungsi, persamaan dan pertidaksamaan linear; menganalisis bangun datar dan bangun ruang beserta sifat-sifatnya; memahami transformasi geometri; serta mengolah dan menafsirkan data statistika dan peluang untuk mengambil keputusan.' }
+      ]
+    },
+    {
+      id: 'ipa-smp', nama: 'Ilmu Pengetahuan Alam (IPA)', icon: '🔬', color: '#EAF3DE', iconColor: '#3B6D11',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu melakukan observasi, mengajukan pertanyaan ilmiah, merencanakan dan melaksanakan penyelidikan sains. Peserta didik memahami konsep dasar fisika (gerak, gaya, energi, gelombang, listrik), kimia (zat dan perubahan, asam-basa, reaksi kimia), dan biologi (sel, jaringan, organ, ekosistem, genetika dasar). Peserta didik mengomunikasikan hasil penyelidikan secara ilmiah.' }
+      ]
+    },
+    {
+      id: 'ips-smp', nama: 'Ilmu Pengetahuan Sosial (IPS)', icon: '🌏', color: '#FAEEDA', iconColor: '#633806',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu memahami kondisi geografis, demografis, dan sumber daya alam Indonesia; menganalisis perjalanan sejarah bangsa Indonesia; memahami konsep ekonomi dasar, sistem perekonomian, dan peran lembaga keuangan; serta mengkaji dinamika masyarakat, interaksi sosial, dan permasalahan sosial untuk menumbuhkan kepedulian terhadap lingkungan sekitar.' }
+      ]
+    },
+    {
+      id: 'sbdp-smp', nama: 'Seni Budaya', icon: '🎨', color: '#FBEAF0', iconColor: '#993556',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu mengapresiasi dan mengkritisi karya seni rupa, seni musik, seni tari, dan teater dari berbagai perspektif estetika dan budaya. Peserta didik mampu berkreasi dengan menggunakan berbagai medium, teknik, dan prosedur seni secara orisinal, mengekspresikan gagasan dengan percaya diri, dan mengomunikasikan karya serta proses penciptaannya.' }
+      ]
+    },
+    {
+      id: 'pjok-smp', nama: 'PJOK', icon: '⚽', color: '#E1F5EE', iconColor: '#085041',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu mempraktikkan berbagai aktivitas jasmani dan olahraga dengan keterampilan, taktik, dan sportivitas yang baik. Peserta didik memahami konsep kebugaran jasmani, kesehatan reproduksi remaja, pencegahan penyakit, pertolongan pertama, dan bahaya narkoba, serta menerapkan gaya hidup aktif dan sehat secara konsisten.' }
+      ]
+    },
+    {
+      id: 'bing-smp', nama: 'Bahasa Inggris', icon: '🌐', color: '#EEEDFE', iconColor: '#3C3489',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu memahami teks lisan dan tulisan dalam Bahasa Inggris dari berbagai genre (deskriptif, naratif, prosedur, recount, eksposisi) secara analitis. Peserta didik mampu berkomunikasi secara lisan dan tulisan dalam berbagai situasi formal dan informal, menggunakan tata bahasa dan kosakata yang tepat, serta mengapresiasi karya sastra berbahasa Inggris secara sederhana.' }
+      ]
+    },
+    {
+      id: 'informatika-smp', nama: 'Informatika', icon: '💻', color: '#E6F1FB', iconColor: '#0C447C',
+      fases: [
+        { fase: 'D', kelas: 'Kelas 7–9', cp: 'Peserta didik mampu menerapkan berpikir komputasional dalam memecahkan permasalahan sehari-hari. Peserta didik memahami dan mampu menggunakan perangkat TIK, sistem jaringan, dan internet secara etis dan bertanggung jawab; mampu membuat program sederhana menggunakan bahasa pemrograman; serta memahami konsep data, analisis data, dan dampak sosial informatika.' }
+      ]
+    }
+  ]
+};
+
+let activeJenjang = 'sd';
+let openCards = {};
+
+function setJenjang(j) {
+  activeJenjang = j;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['sd','smp','all'][i] === j);
+  });
+  document.getElementById('faseFilter').value = '';
+  updateFaseOptions();
+  renderCards();
+}
+
+function updateFaseOptions() {
+  const sel = document.getElementById('faseFilter');
+  const opts = sel.querySelectorAll('option');
+  opts.forEach(o => {
+    if (o.value === '') return;
+    const f = o.value;
+    if (activeJenjang === 'sd') {
+      o.style.display = ['A','B','C'].includes(f) ? '' : 'none';
+    } else if (activeJenjang === 'smp') {
+      o.style.display = f === 'D' ? '' : 'none';
+    } else {
+      o.style.display = '';
+    }
+  });
+}
+
+function getFilteredData() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const faseF = document.getElementById('faseFilter').value;
+
+  let pool = [];
+  if (activeJenjang === 'sd') pool = CP_DATA.sd;
+  else if (activeJenjang === 'smp') pool = CP_DATA.smp;
+  else pool = [...CP_DATA.sd, ...CP_DATA.smp];
+
+  return pool.map(m => {
+    const fasesFiltered = m.fases.filter(f => {
+      const faseMatch = !faseF || f.fase === faseF;
+      const qMatch = !q || m.nama.toLowerCase().includes(q) || f.cp.toLowerCase().includes(q) || f.fase.toLowerCase().includes(q) || f.kelas.toLowerCase().includes(q);
+      return faseMatch && qMatch;
+    });
+    if (fasesFiltered.length === 0) return null;
+    return { ...m, fases: fasesFiltered };
+  }).filter(Boolean);
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Tersalin!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyAll() {
+  const filtered = getFilteredData();
+  let out = '';
+  filtered.forEach(m => {
+    out += `=== ${m.nama} ===\n`;
+    m.fases.forEach(f => {
+      out += `\n[Fase ${f.fase} — ${f.kelas}]\n${f.cp}\n`;
+    });
+    out += '\n';
+  });
+  const btn = document.getElementById('copyAllBtn');
+  navigator.clipboard.writeText(out.trim()).then(() => {
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Semua tersalin!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Salin semua CP yang tampil';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+function renderCards() {
+  const container = document.getElementById('cardContainer');
+  const filtered = getFilteredData();
+
+  document.getElementById('countInfo').textContent = `Menampilkan ${filtered.length} mata pelajaran`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><i class="ti ti-search" style="font-size:32px;display:block;margin-bottom:8px;" aria-hidden="true"></i>Tidak ada hasil ditemukan.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const isOpen = openCards[m.id] || false;
+    const faseBadges = [...new Set(m.fases.map(f => f.fase))].map(f => `<span class="mapel-fase-badge" style="background:${m.color};color:${m.iconColor};">Fase ${f}</span>`).join(' ');
+
+    const faseItems = m.fases.map(f => `
+      <div class="fase-item">
+        <div class="fase-header">
+          <span class="fase-label">Fase ${f.fase}</span>
+          <span class="fase-kelas">${f.kelas}</span>
+        </div>
+        <div class="cp-text">${f.cp}</div>
+        <button class="copy-btn" onclick="event.stopPropagation(); copyText(${JSON.stringify('Fase ' + f.fase + ' (' + f.kelas + ') — ' + m.nama + ':\n' + f.cp)}, this)">
+          <i class="ti ti-copy" aria-hidden="true"></i> Salin CP ini
+        </button>
+      </div>
+    `).join('');
+
+    return `
+      <div class="mapel-card" id="card-${m.id}">
+        <div class="mapel-header" onclick="toggleCard('${m.id}')">
+          <div class="mapel-title-row">
+            <div class="mapel-icon" style="background:${m.color};">${m.icon}</div>
+            <div>
+              <div class="mapel-name">${m.nama}</div>
+              <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">${faseBadges}</div>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron ${isOpen ? 'open' : ''}" aria-hidden="true"></i>
+        </div>
+        <div class="fase-list ${isOpen ? 'show' : ''}" id="fase-${m.id}">
+          ${faseItems}
+          <button class="copy-all-btn" style="margin:4px 12px 4px;" onclick="copyMapelAll(${JSON.stringify(m.nama)}, ${JSON.stringify(m.fases)}, this)">
+            <i class="ti ti-copy" aria-hidden="true"></i> Salin semua fase mapel ini
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCard(id) {
+  openCards[id] = !openCards[id];
+  const list = document.getElementById('fase-' + id);
+  const chevron = document.querySelector(`#card-${id} .chevron`);
+  list.classList.toggle('show', openCards[id]);
+  chevron.classList.toggle('open', openCards[id]);
+}
+
+function copyMapelAll(nama, fases, btn) {
+  event.stopPropagation();
+  let out = `=== ${nama} ===\n`;
+  fases.forEach(f => { out += `\n[Fase ${f.fase} — ${f.kelas}]\n${f.cp}\n`; });
+  navigator.clipboard.writeText(out.trim()).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Tersalin!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+updateFaseOptions();
+renderCards();
+</script>
